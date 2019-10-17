@@ -5,8 +5,8 @@ agent:
     type: e1-standard-2
   
   containers:
-  - name: rust
-    image: clux/muslrust:stable
+  - name: main
+    image: semaphoreci/rust:1.38
 
 blocks:
 - name: "Lints and tests"
