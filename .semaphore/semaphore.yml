@@ -11,21 +11,25 @@ agent:
 blocks:
 - name: "Lints and tests"
   task:
+    prologue:
+    - rustup component add rustfmt clippy
     jobs:
     - name: "Format check"
       commands:
-      - rustup component add rustfmt
       - checkout
       - cargo fmt -v --all -- --check
     - name: "Style check"
       commands:
-      - rustup component add clippy
       - checkout
+      - cache restore rust-cache
       - cargo clippy -v --locked --all
+      - cache store rust-cache "${HOME}/.cargo/registry"
     - name: "Unit test check"
       commands:
       - checkout
+      - cache restore rust-cache
       - cargo test -v --locked --all
+      - cache store rust-cache "${HOME}/.cargo/registry"
 
 - name: "Build"
   task:
@@ -33,4 +37,21 @@ blocks:
     - name: "Build binary"
       commands:
       - checkout
+      - cache restore rust-cache
       - cargo build --release -v --locked --all
+      - cache store rust-cache "${HOME}/.cargo/registry"
+    - name: "Build Docker image"
+      commands:
+      - checkout
+      - docker build . -t httpose
+
+- name: "Push"
+  task:
+    secrets:
+    - name: docker-secrets
+    jobs:
+    - name: "Push Docker image"
+      commands:
+      - docker login -u "${DOCKER_USERNAME}" -e "${DOCKER_PASSWORD}"
+      - docker tag httpose "${DOCKER_USERNAME}/httpose"
+      - docker push "${DOCKER_USERNAME}/httpose"
