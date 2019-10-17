@@ -1,0 +1,34 @@
+version: v1.0
+name: httpose build
+agent:
+  machine:
+    type: e1-standard-2
+  
+  containers:
+  - name: rust
+    image: clux/muslrust:stable
+
+blocks:
+- name: "Lints and tests"
+  task:
+    jobs:
+    - name: "Format check"
+      commands:
+      - checkout
+      - cargo fmt -v --all -- --check
+    - name: "Style check"
+      commands:
+      - checkout
+      - cargo clippy -v --locked --all
+    - name: "Unit test check"
+      commands:
+      - checkout
+      - cargo test -v --locked --all
+
+- name: "Build"
+  task:
+    jobs:
+    - name: "Build binary"
+      commands:
+      - checkout
+      - cargo build --release -v --locked --all
