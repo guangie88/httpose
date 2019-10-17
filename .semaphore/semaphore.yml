@@ -24,13 +24,13 @@ blocks:
       - checkout
       - cache restore rust-cache
       - cargo clippy -v --locked --all
-      - cache store rust-cache "${HOME}/.cargo/registry"
+      - cache store rust-cache "${CARGO_HOME}/registry"
     - name: "Unit test check"
       commands:
       - checkout
       - cache restore rust-cache
       - cargo test -v --locked --all
-      - cache store rust-cache "${HOME}/.cargo/registry"
+      - cache store rust-cache "${CARGO_HOME}/registry"
 
 - name: "Build"
   task:
@@ -40,7 +40,7 @@ blocks:
       - checkout
       - cache restore rust-cache
       - cargo build --release -v --locked --all
-      - cache store rust-cache "${HOME}/.cargo/registry"
+      - cache store rust-cache "${CARGO_HOME}/registry"
     - name: "Build Docker image"
       commands:
       - checkout
