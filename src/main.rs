@@ -96,7 +96,7 @@ fn main_impl() -> Result<()> {
     };
 
     let secret = Arc::new(secret);
-    let (tx, rx) = mpsc::channel(100);
+    let (tx, rx) = mpsc::channel(1);
     let tx = Arc::new(Mutex::new(tx));
 
     // Gracefully handle SIGTERM
