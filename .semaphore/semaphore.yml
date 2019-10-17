@@ -33,7 +33,7 @@ blocks:
       - cache restore build-cache
       - cargo clippy -v --locked --all
       - cache store cargo-cache "${CARGO_HOME}/registry"
-      - cache store build-cache "${SEMAPHORE_GIT_DIR}/target"
+      - cache store build-cache "$(pwd)/target"
     - name: "Unit test check"
       commands:
       - checkout
@@ -41,7 +41,7 @@ blocks:
       - cache restore build-cache
       - cargo test -v --locked --all
       - cache store cargo-cache "${CARGO_HOME}/registry"
-      - cache store build-cache "${SEMAPHORE_GIT_DIR}/target"
+      - cache store build-cache "$(pwd)/target"
 
 - name: "Build"
   task:
@@ -53,7 +53,7 @@ blocks:
       - cache restore build-cache
       - cargo build --release -v --locked --all
       - cache store cargo-cache "${CARGO_HOME}/registry"
-      - cache store build-cache "${SEMAPHORE_GIT_DIR}/target"
+      - cache store build-cache "$(pwd)/target"
     - name: "Build Docker image"
       commands:
       - checkout
