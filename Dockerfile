@@ -20,4 +20,3 @@ ARG ARCH=amd64
 ARG OS=linux
 COPY --from=misc /build/httpose_${ARCH}_${OS} ./httpose
 ENTRYPOINT ["./httpose"]
-CMD ["-h"]
