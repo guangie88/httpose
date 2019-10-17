@@ -60,6 +60,6 @@ blocks:
     jobs:
     - name: "Push Docker image"
       commands:
-      - echo ${DOCKER_PASSWORD} | docker login -u "${DOCKER_USERNAME}" --password-stdin
+      - echo ${DOCKER_PASSWORD} | docker login --username "${DOCKER_USERNAME}" --password-stdin
       - docker tag httpose "${DOCKER_USERNAME}/httpose"
       - docker push "${DOCKER_USERNAME}/httpose"
