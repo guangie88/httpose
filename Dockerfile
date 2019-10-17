@@ -19,4 +19,4 @@ WORKDIR /app
 ARG ARCH=amd64
 ARG OS=linux
 COPY --from=misc /build/httpose_${ARCH}_${OS} ./httpose
-CMD ./httpose
+CMD ["./httpose"]
