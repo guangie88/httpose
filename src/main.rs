@@ -1,6 +1,8 @@
 #![deny(warnings)]
 #![warn(rust_2018_idioms)]
 
+use futures::stream::Stream;
+use futures::sync::mpsc;
 use hyper::rt::{self, Future};
 use hyper::service::service_fn_ok;
 use hyper::{Body, Request, Response, Server};
@@ -11,12 +13,15 @@ use std::io::{stdin, stdout, Write};
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::process;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use structopt::StructOpt;
 use termion::input::TermRead;
 
 #[derive(Debug, Snafu)]
 enum Error {
+    #[snafu(display("Could not set SIGTERM handler: {}", source))]
+    HandlerError { source: ctrlc::Error },
+
     #[snafu(display("Could not read secret from file {}: {}", path.display(), source))]
     ReadFromFile {
         path: PathBuf,
@@ -91,6 +96,18 @@ fn main_impl() -> Result<()> {
     };
 
     let secret = Arc::new(secret);
+    let (tx, rx) = mpsc::channel(100);
+    let tx = Arc::new(Mutex::new(tx));
+
+    // Gracefully handler
+    ctrlc::set_handler(move || {
+        let _ = tx
+            .lock()
+            .expect("Unable to lock mutex to get handler sender! Aborting...")
+            .try_send(())
+            .expect("Handler unable to send signal to receiver! Aborting...");
+    })
+    .context(HandlerError {})?;
 
     let server = Server::bind(&opt.addr)
         .serve(move || {
@@ -99,10 +116,13 @@ fn main_impl() -> Result<()> {
                 Response::new(Body::from((*secret).clone()))
             })
         })
+        .with_graceful_shutdown(rx.into_future().map(|_| ()))
         .map_err(|e| eprintln!("Server error: {}", e));
 
     println!("Listening on {}", opt.addr);
     rt::run(server);
+    println!("\nReceived SIGTERM, terminating...");
+
     Ok(())
 }
 
