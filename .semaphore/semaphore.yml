@@ -14,10 +14,12 @@ blocks:
     jobs:
     - name: "Format check"
       commands:
+      - rustup component add rustfmt
       - checkout
       - cargo fmt -v --all -- --check
     - name: "Style check"
       commands:
+      - rustup component add clippy
       - checkout
       - cargo clippy -v --locked --all
     - name: "Unit test check"
