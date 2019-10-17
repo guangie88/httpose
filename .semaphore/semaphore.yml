@@ -12,7 +12,8 @@ blocks:
 - name: "Lints and tests"
   task:
     prologue:
-    - rustup component add rustfmt clippy
+      commands:
+      - rustup component add rustfmt clippy
     jobs:
     - name: "Format check"
       commands:
@@ -52,6 +53,6 @@ blocks:
     jobs:
     - name: "Push Docker image"
       commands:
-      - docker login -u "${DOCKER_USERNAME}" -e "${DOCKER_PASSWORD}"
+      - echo ${DOCKER_PASSWORD} | docker login -u "${DOCKER_USERNAME}" --password-stdin
       - docker tag httpose "${DOCKER_USERNAME}/httpose"
       - docker push "${DOCKER_USERNAME}/httpose"
