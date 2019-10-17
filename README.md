@@ -15,6 +15,10 @@ Simply run
 ./httpose (secret will be consumed via stdin)
 ## (CTRL-C to terminate)
 
+## Pipe in also works
+echo xxx | ./httpose
+## (CTRL-C to terminate)
+
 # env var
 HTTPOSE_SECRET=xxx ./httpose
 ## (CTRL-C to terminate)
