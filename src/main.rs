@@ -99,7 +99,7 @@ fn main_impl() -> Result<()> {
     let (tx, rx) = mpsc::channel(100);
     let tx = Arc::new(Mutex::new(tx));
 
-    // Gracefully handler
+    // Gracefully handle SIGTERM
     ctrlc::set_handler(move || {
         let _ = tx
             .lock()
