@@ -3,10 +3,13 @@ name: httpose build
 agent:
   machine:
     type: e1-standard-2
-  
   containers:
   - name: main
     image: semaphoreci/rust:1.38
+
+auto_cancel:
+  queued:
+    when: "true"
 
 blocks:
 - name: "Lints and tests"
