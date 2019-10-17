@@ -19,8 +19,8 @@ use termion::input::TermRead;
 
 #[derive(Debug, Snafu)]
 enum Error {
-    #[snafu(display("Could not set SIGTERM handler: {}", source))]
-    HandlerError { source: ctrlc::Error },
+    #[snafu(display("Stdin aborted"))]
+    AbortedStdin { backtrace: Backtrace },
 
     #[snafu(display("Could not read secret from file {}: {}", path.display(), source))]
     ReadFromFile {
@@ -28,14 +28,14 @@ enum Error {
         source: std::io::Error,
     },
 
+    #[snafu(display("Could not set SIGTERM handler: {}", source))]
+    SignalHandler { source: ctrlc::Error },
+
     #[snafu(display("Stdin error: {}", source))]
-    StdinError { source: std::io::Error },
+    Stdin { source: std::io::Error },
 
     #[snafu(display("Stdout error: {}", source))]
-    StdoutError { source: std::io::Error },
-
-    #[snafu(display("Stdin aborted"))]
-    StdinAborted { backtrace: Backtrace },
+    Stdout { source: std::io::Error },
 }
 
 type Result<T, E = Error> = std::result::Result<T, E>;
@@ -52,7 +52,7 @@ struct Opt {
     file: Option<PathBuf>,
 }
 
-const SECRET_NAME: &'static str = "HTTPOSE_SECRET";
+const SECRET_NAME: &str = "HTTPOSE_SECRET";
 
 fn main_impl() -> Result<()> {
     let opt = Opt::from_args();
@@ -78,7 +78,7 @@ fn main_impl() -> Result<()> {
             // Get secret from stdin without echoing
             _ => {
                 print!("Enter the secret: ");
-                stdout().flush().context(StdoutError {})?;
+                stdout().flush().context(Stdout {})?;
 
                 let stdin = stdin();
                 let mut stdin = stdin.lock();
@@ -86,8 +86,8 @@ fn main_impl() -> Result<()> {
                 let mut stdout = stdout.lock();
                 let secret = stdin
                     .read_passwd(&mut stdout)
-                    .context(StdinError {})?
-                    .context(StdinAborted {})?;
+                    .context(Stdin {})?
+                    .context(AbortedStdin {})?;
 
                 println!();
                 secret
@@ -101,13 +101,12 @@ fn main_impl() -> Result<()> {
 
     // Gracefully handle SIGTERM
     ctrlc::set_handler(move || {
-        let _ = tx
-            .lock()
+        tx.lock()
             .expect("Unable to lock mutex to get handler sender! Aborting...")
             .try_send(())
             .expect("Handler unable to send signal to receiver! Aborting...");
     })
-    .context(HandlerError {})?;
+    .context(SignalHandler {})?;
 
     let server = Server::bind(&opt.addr)
         .serve(move || {
@@ -119,7 +118,7 @@ fn main_impl() -> Result<()> {
         .with_graceful_shutdown(rx.into_future().map(|_| ()))
         .map_err(|e| eprintln!("Server error: {}", e));
 
-    println!("Listening on {}", opt.addr);
+    println!("Serving on {}", opt.addr);
     rt::run(server);
     println!("\nReceived SIGTERM, terminating...");
 
