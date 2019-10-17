@@ -14,9 +14,10 @@ ARG OS=linux
 COPY --from=build /build/target/x86_64-unknown-linux-musl/release/httpose ./httpose_${ARCH}_${OS}
 RUN upx --lzma --best ./httpose_${ARCH}_${OS}
 
-FROM alpine:3.10 AS release
+FROM scratch AS release
 WORKDIR /app
 ARG ARCH=amd64
 ARG OS=linux
 COPY --from=misc /build/httpose_${ARCH}_${OS} ./httpose
 ENTRYPOINT ["./httpose"]
+CMD ["-h"]
