@@ -1,5 +1,7 @@
 # `httpose`
 
+[![Codefresh build status]( https://g.codefresh.io/api/badges/pipeline/guangie88/public-repos%2Fhttpose?branch=master&key=eyJhbGciOiJIUzI1NiJ9.NWM4MjcyMzg3Y2NkOTUzZTcxM2RiMjRl.cTJ8XB8rM4mRl2LmZBHaIVZ92MxdGgb7Mmib1jt8o4E&type=cf-1)]( https://g.codefresh.io/pipelines/httpose/builds?repoOwner=guangie88&repoName=httpose&serviceName=guangie88%2Fhttpose&filter=trigger:build~Build;branch:master;pipeline:5da908bcba23a425e23f2d3f~httpose)
+
 A quick and dirty solution to "HTTP-expose" secret meant for Docker build.
 
 **Caveat**: This does not employ any SSL over HTTP, and assumes the working
@@ -47,9 +49,13 @@ curl -s http://127.0.0.1:2048/
 wget -qO - http://127.0.0.1:2048/
 ```
 
+## Changelogs
+
+See [CHANGELOG.md](CHANGELOG.md) for more details.
+
 ## Cargo build
 
-You will need to install `cargo` and `rustc`. See (`rustup`)[https://rustup.rs]
+You will need to install `cargo` and `rustc`. See (`rustup`)[<https://rustup.rs]>
 for more information.
 
 To build in release mode via `cargo`, simply run:
